@@ -5,31 +5,42 @@ import ReactGA from "react-ga4";
 const GA_MEASUREMENT_ID = "G-L0F1K10EBC"; // Reemplazalo con tu ID de GA4
 
 function App() {
-  const [gaAccepted, setGaAccepted] = useState(() =>
-    localStorage.getItem("gaAccepted") === "true"
-  );
+  const [gaConsent, setGaConsent] = useState(() => {
+    const stored = localStorage.getItem("gaConsent");
+    return stored === "true" ? true : stored === "false" ? false : null;
+  });
 
   useEffect(() => {
-    if (gaAccepted) {
+    if (gaConsent === true) {
       ReactGA.initialize(GA_MEASUREMENT_ID);
       ReactGA.send("pageview");
     }
-  }, [gaAccepted]);
+  }, [gaConsent]);
 
   const handleAccept = () => {
-    setGaAccepted(true);
-    localStorage.setItem("gaAccepted", "true");
+    setGaConsent(true);
+    localStorage.setItem("gaConsent", "true");
+  };
+
+  const handleDeny = () => {
+    setGaConsent(false);
+    localStorage.setItem("gaConsent", "false");
   };
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Mi App con Google Analytics</h1>
-      {!gaAccepted && (
-        <button onClick={handleAccept}>
-          Aceptar Google Analytics
-        </button>
+
+      {gaConsent === null && (
+        <>
+          <p>¿Querés permitir el uso de Google Analytics?</p>
+          <button onClick={handleAccept}>Aceptar</button>{" "}
+          <button onClick={handleDeny}>Denegar</button>
+        </>
       )}
-      {gaAccepted && <p>Gracias por aceptar el seguimiento.</p>}
+
+      {gaConsent === true && <p>Gracias por aceptar el seguimiento.</p>}
+      {gaConsent === false && <p>No se activará el seguimiento.</p>}
     </div>
   );
 }
